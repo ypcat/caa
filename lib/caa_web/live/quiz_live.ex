@@ -5,7 +5,7 @@ defmodule CaaWeb.QuizLive do
 
   defp new_quizzes(socket) do
     socket
-    |> assign(:quizzes, Core.sample_quizzes(socket.assigns.count))
+    |> assign(:quizzes, Core.sample_quizzes(socket.assigns.user.id, socket.assigns.count))
     |> assign(:answers, %{})
   end
 

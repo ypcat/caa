@@ -41,18 +41,18 @@ defmodule Caa.Core do
     Repo.delete(quiz)
   end
 
-  def sample_quizzes(count) do
+  def sample_quizzes(user_id, count) do
     from(q in Quiz,
       left_join: a in Answer,
       on: q.id == a.quiz_id,
-      where: a.user_id == 1,
       group_by: q.id,
-      select: {q, 1.0 * count(q.answer == a.attempt or nil) / count(q.id)}
+      select: {q, 1.0 * count(a.user_id == ^user_id and q.answer == a.attempt or nil) / count(q.id)}
     )
     |> Repo.all
+    |> tap(&IO.inspect(length(&1), label: "sample_quizzes"))
     |> Enum.shuffle()
     |> Stream.cycle()
-    |> Stream.flat_map(fn {q, p} -> if :rand.uniform() > min(max(p, 0.087), 0.87), do: [q], else: [] end)
+    |> Stream.flat_map(fn {q, p} -> if :rand.uniform()|>IO.inspect(label: "#{q.id} #{p}") > min(max(p, 0.087), 0.87), do: [q], else: [] end)
     |> Stream.dedup()
     |> Enum.take(count)
   end
