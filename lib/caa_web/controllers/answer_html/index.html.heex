@@ -1,0 +1,23 @@
+<.header>
+  Listing Answers
+  <:actions>
+    <.link href={~p"/answers/new"}>
+      <.button>New Answer</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="answers" rows={@answers} row_click={&JS.navigate(~p"/answers/#{&1}")}>
+  <:col :let={answer} label="Attempt"><%= answer.attempt %></:col>
+  <:action :let={answer}>
+    <div class="sr-only">
+      <.link navigate={~p"/answers/#{answer}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/answers/#{answer}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={answer}>
+    <.link href={~p"/answers/#{answer}"} method="delete" data-confirm="Are you sure?">
+      Delete
+    </.link>
+  </:action>
+</.table>
