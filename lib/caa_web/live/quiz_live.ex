@@ -61,10 +61,10 @@ defmodule CaaWeb.QuizLive do
         <li :for={opt <- q.options} class="pt-1">
           <% a = String.at(opt, 1) %>
           <% cls = case {done, q.answer, @answers[q.id]} do
-            {true, ^a, ^a} -> "bg-green-500 hover:bg-green-500"
-            {true, ^a, _} -> "bg-red-500 hover:bg-red-500"
-            {_, _, ^a} -> "bg-blue-500 hover:bg-blue-500"
-            _ -> "bg-gray-900 hover:bg-gray-900"
+            {true, ^a, ^a} -> "!bg-green-500 !hover:bg-green-500"
+            {true, ^a, _} -> "!bg-red-500 !hover:bg-red-500"
+            {_, _, ^a} -> "!bg-blue-500 !hover:bg-blue-500"
+            _ -> "!bg-gray-900 !hover:bg-gray-900"
           end %>
           <.button phx-click="answer" phx-value-q={q.id} phx-value-a={a} class={cls}><%= opt %></.button>
         </li>

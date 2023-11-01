@@ -20,7 +20,6 @@ defmodule CaaWeb.Router do
   scope "/", CaaWeb do
     pipe_through :browser
 
-    #get "/", PageController, :home
     live "/", QuizLive
   end
 
