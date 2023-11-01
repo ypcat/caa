@@ -46,15 +46,22 @@ defmodule Caa.Core do
       left_join: a in Answer,
       on: q.id == a.quiz_id,
       group_by: q.id,
-      select: {q, 1.0 * count(a.user_id == ^user_id and q.answer == a.attempt or nil) / count(q.id)}
+      select: {q, 1.0 * count(a.user_id == ^user_id and q.answer == a.attempt or nil) / fragment("greatest(?, 1)", count(a.user_id == ^user_id or is_nil(a.user_id) or nil))}
     )
+    |> preload([:answers]) # XXX debug
     |> Repo.all
-    |> tap(&IO.inspect(length(&1), label: "sample_quizzes"))
+    #|> tap(&IO.inspect(length(&1), label: "sample_quizzes")) # XXX debug
     |> Enum.shuffle()
     |> Stream.cycle()
-    |> Stream.flat_map(fn {q, p} -> if :rand.uniform()|>IO.inspect(label: "#{q.id} #{p}") > min(max(p, 0.087), 0.87), do: [q], else: [] end)
+    |> Stream.flat_map(fn {q, p} -> if :rand.uniform() |>qq(q,p) > min(max(p, 0.087), 0.87), do: [q], else: [] end)
     |> Stream.dedup()
     |> Enum.take(count)
+  end
+
+  def qq(r, q, p) do # XXX debug
+    f=fn x -> :erlang.float_to_binary(x, [decimals: 3])end
+    IO.puts("q=#{q.id} p=#{f.(p)} r=#{f.(r)} a=#{q.answer} #{q.answers|>Enum.map(&"#{&1.attempt}(#{&1.user_id})")|>Enum.join(" ")}")
+    r
   end
 
   def change_quiz(%Quiz{} = quiz, attrs \\ %{}) do

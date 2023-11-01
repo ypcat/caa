@@ -7,6 +7,8 @@ defmodule Caa.Core.Quiz do
     field :question, :string
     field :answer, :string
 
+    has_many :answers, Caa.Core.Answer
+
     timestamps()
   end
 
