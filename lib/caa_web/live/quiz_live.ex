@@ -26,12 +26,10 @@ defmodule CaaWeb.QuizLive do
   end
 
   def handle_event("change_form", %{"count" => str}, socket) do
-    count = case Integer.parse(str) do
-      {int, ""} -> min(max(int, 1), 20)
-      _ -> socket.assigns.count
-    end
-    socket = assign(socket, count: count)
-    {:noreply, socket}
+    socket
+    |> assign(:count, String.to_integer(str))
+    |> new_quizzes()
+    |> then(&{:noreply, &1})
   end
 
   def handle_event("answer", %{"q" => q, "a" => a}, socket) do
@@ -51,27 +49,32 @@ defmodule CaaWeb.QuizLive do
   def render(assigns) do
     ~H"""
     <form phx-change="change_form">
-      <.button type="button" phx-click="new_quizzes">New quizzes</.button>
-      <input type="number" value={@count} name="count" min="1" max="20" />
+      <.button type="button" phx-click="new_quizzes" class="mr-2"><.icon name="hero-arrow-path"/></.button>
+      <span :for={n <- [1, 5, 10, 20]}>
+        <input type="radio" name="count" value={n} checked={n == @count}/>
+        <label class="mx-1"><%= n %></label>
+      </span>
     </form>
     <% done = map_size(@answers) == @count %>
-    <div :for={q <- @quizzes} class="py-2">
-      <h2 class="text-xl"><%= q.question %></h2>
-      <ul>
-        <li :for={opt <- q.options} class="pt-1">
-          <% a = String.at(opt, 1) %>
-          <% cls = case {done, q.answer, @answers[q.id]} do
-            {true, ^a, ^a} -> "!bg-green-500 !hover:bg-green-500"
-            {true, ^a, _} -> "!bg-red-500 !hover:bg-red-500"
-            {_, _, ^a} -> "!bg-blue-500 !hover:bg-blue-500"
-            _ -> "!bg-gray-900 !hover:bg-gray-900"
-          end %>
-          <.button phx-click="answer" phx-value-q={q.id} phx-value-a={a} class={cls}><%= opt %></.button>
-        </li>
-      </ul>
-    </div>
+    <ol class="list-decimal list-inside">
+      <li :for={q <- @quizzes} class="py-2 text-xl">
+        <span><%= q.question %></span>
+        <ul>
+          <li :for={opt <- q.options} class="pt-1">
+            <% a = String.at(opt, 1) %>
+            <% cls = case {done, q.answer, @answers[q.id]} do
+              {true, ^a, ^a} -> "!bg-green-500 !hover:bg-green-500"
+              {true, ^a, _} -> "!bg-red-500 !hover:bg-red-500"
+              {_, _, ^a} -> "!bg-blue-500 !hover:bg-blue-500"
+              _ -> "!bg-gray-900 !hover:bg-gray-900"
+            end %>
+            <.button phx-click="answer" phx-value-q={q.id} phx-value-a={a} class={cls}><%= opt %></.button>
+          </li>
+        </ul>
+      </li>
+    </ol>
     <div :if={done}>
-      <.button type="button" phx-click="new_quizzes">New quizzes</.button>
+      <.button type="button" phx-click="new_quizzes" class="mr-2"><.icon name="hero-arrow-path"/></.button>
       <span class="text-xl">Score: <%= @score %>/<%= @count %></span>
     </div>
     """

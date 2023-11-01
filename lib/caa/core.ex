@@ -52,7 +52,7 @@ defmodule Caa.Core do
     |> Repo.all
     |> Enum.shuffle()
     |> Stream.cycle()
-    |> Stream.flat_map(fn {q, p} -> if :rand.uniform() > min(max(p, 0.1), 0.9), do: [q], else: [] end)
+    |> Stream.flat_map(fn {q, p} -> if :rand.uniform() > min(max(p, 0.087), 0.87), do: [q], else: [] end)
     |> Stream.dedup()
     |> Enum.take(count)
   end
