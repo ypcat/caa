@@ -18,6 +18,16 @@
           <%= @current_user.email %>
         </li>
         <li>
+          <.link href={~p"/"} class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+            Quiz
+          </.link>
+        </li>
+        <li>
+          <.link href={~p"/stats"} class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700">
+            Stats
+          </.link>
+        </li>
+        <li>
           <.link
             href={~p"/users/settings"}
             class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"

@@ -7,11 +7,11 @@ defmodule Caa.Core do
 
   ## Utils
 
-  def import_quizzes do
-    File.read!("q.txt")
+  def import_quizzes(fq, fa) do
+    File.read!(fq)
     |> String.split("\n\n")
     |> Enum.map(&String.split(&1, "\n"))
-    |> Enum.zip(File.read!("a.txt") |> String.split("\n"))
+    |> Enum.zip(File.read!(fa) |> String.split("\n"))
     |> Enum.map(fn {[q | opts], a} -> %{question: q, options: opts, answer: a} end)
     |> Enum.map(&create_quiz/1)
   end
@@ -21,6 +21,14 @@ defmodule Caa.Core do
 
   def list_quizzes do
     Repo.all(Quiz)
+  end
+
+  def list_quizzes_by_user(user_id) do
+    from(q in Quiz,
+      left_join: a in ^(from Answer, where: [user_id: ^user_id]),
+      on: q.id == a.quiz_id,
+      preload: [answers: a]
+    ) |> Repo.all
   end
 
   def get_quiz!(id), do: Repo.get!(Quiz, id)
