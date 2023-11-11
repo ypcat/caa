@@ -9,11 +9,27 @@ defmodule CaaWeb.QuizLive do
     |> assign(:answers, %{})
   end
 
-  def mount(_params, %{"user_token" => user_token}, socket) do
+  defp load_quizzes(socket, nil) do
+    new_quizzes socket
+  end
+  defp load_quizzes(socket, ids) do
+    ids = ids |> String.split(",") |> Enum.map(&String.to_integer/1)
+    socket
+    |> assign(:quizzes, Core.load_quizzes(ids))
+    |> assign(:answers, %{})
+    |> assign(:count, Enum.count(ids))
+  end
+
+  def patch(socket) do
+    ids = socket.assigns.quizzes |> Enum.map(&(&1.id)) |> Enum.join(",")
+    push_patch(socket, to: ~p"/?q=#{ids}")
+  end
+
+  def mount(params, %{"user_token" => user_token}, socket) do
     socket
     |> assign(:user, Core.get_user_by_session_token(user_token))
     |> assign(:count, 1)
-    |> new_quizzes()
+    |> load_quizzes(params["q"])
     |> then(&{:ok, &1})
   end
 
@@ -22,13 +38,17 @@ defmodule CaaWeb.QuizLive do
   end
 
   def handle_event("new_quizzes", _, socket) do
-    {:noreply, new_quizzes(socket)}
+    socket
+    |> new_quizzes()
+    |> patch()
+    |> then(&{:noreply, &1})
   end
 
   def handle_event("change_form", %{"count" => str}, socket) do
     socket
     |> assign(:count, String.to_integer(str))
     |> new_quizzes()
+    |> patch()
     |> then(&{:noreply, &1})
   end
 
@@ -39,6 +59,10 @@ defmodule CaaWeb.QuizLive do
     |> assign(:answers, Map.put(socket.assigns.answers, quiz_id, a))
     |> evaluate()
     |> then(&{:noreply, &1})
+  end
+
+  def handle_params(_params, _url, socket) do
+    {:noreply, socket}
   end
 
   def evaluate(socket) do
